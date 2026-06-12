@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tzdata;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
   static Future<void> initialize() async {
-    tz.initializeTimeZones();
+    // Initialize timezone database
+    tzdata.initializeTimeZones();
+    // Use device local timezone
+    tz.setLocalLocation(tz.getLocation('Europe/Moscow'));
 
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -33,11 +36,11 @@ class NotificationService {
     // Schedule for Monday(1) through Friday(5)
     for (int weekday = 1; weekday <= 5; weekday++) {
       await _plugin.zonedSchedule(
-        weekday, // unique ID per weekday
+        weekday,
         '📚 English Tracker',
         'Your English lesson is ready!',
         _nextInstanceOfWeekdayTime(weekday, 9, 0),
-        const NotificationDetails(
+        NotificationDetails(
           android: AndroidNotificationDetails(
             'daily_reminder',
             'Daily Reminders',
@@ -45,7 +48,7 @@ class NotificationService {
             importance: Importance.high,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
-            color: Color(0xFF00E5FF),
+            color: const Color(0xFF00E5FF),
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -71,7 +74,7 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
-    // If it's already passed this week, schedule for next week
+    // If it's already passed, schedule for next week
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 7));
     }
