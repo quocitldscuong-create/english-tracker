@@ -28,11 +28,9 @@ jobs:
           cache: true
 
       - name: Verify Flutter
-        run: |
-          flutter --version
-          flutter doctor -v
+        run: flutter --version
 
-      - name: Create full Flutter project in /tmp/app
+      - name: Create Flutter scaffold in /tmp/app
         run: |
           flutter create \
             --org com.englishtracker \
@@ -40,33 +38,26 @@ jobs:
             --platforms android \
             /tmp/app
 
-      - name: Overlay our lib and pubspec
+      - name: Overlay our source files
         run: |
           rm -rf /tmp/app/lib
           cp -r $GITHUB_WORKSPACE/lib /tmp/app/lib
           cp $GITHUB_WORKSPACE/pubspec.yaml /tmp/app/pubspec.yaml
-
-      - name: Patch AndroidManifest
-        run: |
           cp $GITHUB_WORKSPACE/android/app/src/main/AndroidManifest.xml \
              /tmp/app/android/app/src/main/AndroidManifest.xml
 
-      - name: Get Flutter dependencies
+      - name: Get dependencies
         working-directory: /tmp/app
         run: flutter pub get
 
-      - name: Check for errors
+      - name: Analyze (non-fatal)
         working-directory: /tmp/app
         run: flutter analyze --no-fatal-infos
         continue-on-error: true
 
       - name: Build APK
         working-directory: /tmp/app
-        run: |
-          flutter build apk \
-            --release \
-            --no-shrink \
-            --verbose
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -75,7 +66,5 @@ jobs:
           path: /tmp/app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      - name: Confirm success
-        run: |
-          echo "=== APK Info ==="
-          ls -lh /tmp/app/build/app/outputs/flutter-apk/
+      - name: Done
+        run: ls -lh /tmp/app/build/app/outputs/flutter-apk/

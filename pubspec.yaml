@@ -9,19 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # Local storage
   shared_preferences: ^2.2.2
-
-  # Local notifications
-  flutter_local_notifications: ^17.2.1+2
+  flutter_local_notifications: ^17.0.0
   timezone: ^0.9.4
-
-  # URL launcher for YouTube links
   url_launcher: ^6.2.5
-
-  # Icons
-  flutter_svg: ^2.0.10+1
 
 dev_dependencies:
   flutter_test:

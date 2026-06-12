@@ -45,12 +45,12 @@ class _HomeScreenState extends State<HomeScreen>
         _lessons = lessons;
         _loading = false;
       });
-      _animController.forward(from: 0);
+      _animController.forward(from: 0.0);
     }
   }
 
   int get _todayIndex {
-    final weekday = DateTime.now().weekday; // 1=Mon .. 7=Sun
+    final weekday = DateTime.now().weekday;
     if (weekday >= 1 && weekday <= 5) return weekday - 1;
     return -1;
   }
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen>
   int get _completedCount => _lessons.where((l) => l.isCompleted).length;
 
   double get _progressPercent =>
-      _lessons.isEmpty ? 0 : _completedCount / _lessons.length;
+      _lessons.isEmpty ? 0.0 : _completedCount / _lessons.length;
 
   Future<void> _openLesson(Lesson lesson) async {
     await Navigator.push(
@@ -71,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
     );
-    // Refresh after returning
     await _loadData();
   }
 
@@ -88,16 +87,15 @@ class _HomeScreenState extends State<HomeScreen>
                 SliverToBoxAdapter(child: _buildProgressHeader()),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                    (ctx, index) {
                       final lesson = _lessons[index];
-                      final delay = index * 80;
+                      final delayMs = index * 80;
                       return TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0, end: 1),
-                        duration:
-                            Duration(milliseconds: 400 + delay),
+                        tween: Tween<double>(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 400 + delayMs),
                         curve: Curves.easeOutCubic,
-                        builder: (context, value, child) => Transform.translate(
-                          offset: Offset(0, 30 * (1 - value)),
+                        builder: (_, value, child) => Transform.translate(
+                          offset: Offset(0.0, 30.0 * (1.0 - value)),
                           child: Opacity(opacity: value, child: child),
                         ),
                         child: DayCard(
@@ -124,18 +122,17 @@ class _HomeScreenState extends State<HomeScreen>
       pinned: true,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding:
-            const EdgeInsets.only(left: 20, bottom: 16),
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
         title: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'ENGLISH TRACKER',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
-                color: const Color(0xFF00E5FF),
+                color: Color(0xFF00E5FF),
                 letterSpacing: 2.5,
               ),
             ),
@@ -187,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Weekly Progress',
                   style: TextStyle(
                     fontSize: 13,
@@ -209,10 +206,10 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(height: 12),
             TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: _progressPercent),
+              tween: Tween<double>(begin: 0.0, end: _progressPercent),
               duration: const Duration(milliseconds: 900),
               curve: Curves.easeOutCubic,
-              builder: (context, value, _) {
+              builder: (_, value, __) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -233,9 +230,9 @@ class _HomeScreenState extends State<HomeScreen>
                     Text(
                       value >= 1.0
                           ? '🎉 Week complete! Great job!'
-                          : value == 0
+                          : value == 0.0
                               ? 'Start your first lesson →'
-                              : '${(value * 100).toStringAsFixed(0)}% complete — keep going!',
+                              : '${(value * 100.0).toStringAsFixed(0)}% complete — keep going!',
                       style: TextStyle(
                         fontSize: 12,
                         color: value >= 1.0
