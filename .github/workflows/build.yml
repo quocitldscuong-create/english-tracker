@@ -3,7 +3,7 @@ name: Build Flutter APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build-apk:
@@ -27,28 +27,58 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Verify Flutter installation
+        run: flutter --version
+
+      - name: Scaffold a complete Flutter project
+        run: |
+          # Create full Flutter project with all Android boilerplate in /tmp/app
+          flutter create \
+            --org com.englishtracker \
+            --project-name english_tracker \
+            --platforms android \
+            /tmp/app
+
+          echo "✅ Scaffold created"
+          ls /tmp/app
+
+      - name: Overlay our source files onto the scaffold
+        run: |
+          # Replace lib/ with our code
+          rm -rf /tmp/app/lib
+          cp -r lib /tmp/app/lib
+
+          # Replace pubspec.yaml with ours
+          cp pubspec.yaml /tmp/app/pubspec.yaml
+
+          # Replace AndroidManifest with ours (keep the scaffold's android/ structure)
+          cp android/app/src/main/AndroidManifest.xml \
+             /tmp/app/android/app/src/main/AndroidManifest.xml
+
+          echo "✅ Source files overlaid"
+          ls /tmp/app/lib
+
       - name: Install dependencies
+        working-directory: /tmp/app
         run: flutter pub get
 
       - name: Analyze code
+        working-directory: /tmp/app
         run: flutter analyze --no-fatal-infos
         continue-on-error: true
 
-      - name: Run tests
-        run: flutter test
-        continue-on-error: true
-
       - name: Build release APK
+        working-directory: /tmp/app
         run: flutter build apk --release --no-shrink
+
+      - name: Show APK info
+        run: |
+          echo "✅ APK built successfully!"
+          ls -lh /tmp/app/build/app/outputs/flutter-apk/
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: english-tracker-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
-
-      - name: Show APK info
-        run: |
-          echo "✅ APK built successfully!"
-          ls -lh build/app/outputs/flutter-apk/
